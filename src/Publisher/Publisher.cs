@@ -4,6 +4,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Publisher.Model;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Publisher
@@ -14,7 +15,8 @@ namespace Publisher
         public static async Task Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "Publisher/Start")] HttpRequest req,
             [ServiceBus("oa-func-test-topic", Connection = "ServiceBusConnectionString")] IAsyncCollector<PieceOfData> topicCollector,
-            ILogger logger)
+            ILogger logger,
+            CancellationToken ct)
         {
             logger.LogInformation("Starting Service Bus test");
 
@@ -22,7 +24,7 @@ namespace Publisher
 
             for (int i = 0; i < count; i++)
             {
-                await topicCollector.AddAsync(new PieceOfData {Id = Guid.NewGuid(), Name = i.ToString()});
+                await topicCollector.AddAsync(new PieceOfData {Id = Guid.NewGuid(), Name = i.ToString()}, ct);
             }
 
             logger.LogInformation("Service Bus test executed successfully");
