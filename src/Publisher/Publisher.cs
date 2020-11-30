@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Publisher
@@ -12,22 +10,15 @@ namespace Publisher
     public static class Publisher
     {
         [FunctionName("Publisher")]
-        //[return: ServiceBus("myqueue", Connection = "ServiceBusConnection")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req, ILogger logger)
+        [return: ServiceBus("myqueue", Connection = "ServiceBusConnection")]
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = "Publisher/Start")] HttpRequest req, ILogger logger)
         {
-            logger.LogInformation("C# HTTP trigger function processed a request.");
+            logger.LogInformation("Starting Service Bus test");
 
-            string name = req.Query["name"];
 
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            name = name ?? data?.name;
+            logger.LogInformation("Service Bus test executed successfully");
 
-            string responseMessage = string.IsNullOrEmpty(name)
-                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"Hello, {name}. This HTTP triggered function executed successfully.";
-
-            return new OkObjectResult(responseMessage);
+            return new OkObjectResult(null);
         }
     }
 }
